@@ -42,12 +42,14 @@ async function analyse() {
       const predictions = await modelCache.predict(imgEl.value)
       const top = [...predictions].sort((a, b) => b.probability - a.probability)[0]
       const binMap = {
-        plastic: 'yellow', metal: 'yellow', can: 'yellow',
-        paper: 'blue', cardboard: 'blue',
-        organic: 'brown', food: 'brown',
-        glass: 'green',
-        battery: 'special', electronics: 'special',
-        trash: 'black', other: 'black',
+        plastic: 'leichtverpackungen', metal: 'leichtverpackungen', can: 'leichtverpackungen',
+        paper: 'altpapier',
+        cardboard: 'karton', box: 'karton',
+        organic: 'bioabfall', food: 'bioabfall',
+        glass: 'altglas',
+        battery: 'sondermuell', electronics: 'sondermuell', chemical: 'sondermuell',
+        furniture: 'sperrmuell', bulky: 'sperrmuell',
+        trash: 'restmuell', other: 'restmuell',
       }
       const key = Object.entries(binMap).find(([k]) =>
         top.className.toLowerCase().includes(k)

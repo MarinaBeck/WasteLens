@@ -7,7 +7,7 @@ import FAQItem from './FAQItem.vue'
   <section class="faq-section" id="faq">
     <div class="faq-inner">
       <div class="section-label">FAQ</div>
-      <h2 class="section-title">Datenschutz, Daten &amp; wie alles funktioniert.</h2>
+      <h2 class="section-title">Datenschutz &amp; wie alles funktioniert.</h2>
       <div class="faq-list">
         <FAQItem v-for="item in FAQS" :key="item.q" :q="item.q" :a="item.a" />
       </div>

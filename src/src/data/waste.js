@@ -1,41 +1,59 @@
 export const BINS = {
-  yellow: {
-    label: 'Gelbe Tonne',
+  leichtverpackungen: {
+    label: 'Gelbe Tonne / Gelber Sack',
     color: 'var(--bin-yellow)',
     textColor: 'oklch(30% 0.08 75)',
     bg: 'oklch(96% 0.06 88)',
     icon: '♻️',
-    title: 'Wertstoffe',
-    shortDesc: 'Kunststoffe, Metall & Verpackungen',
+    title: 'Leichtverpackungen',
+    shortDesc: 'Kunststoff & Metall',
     instruction:
-      'Behälter vor der Entsorgung entleeren und ausspülen. Kartons wenn möglich flach drücken.',
+      'Verpackungen entleeren und kurz ausspülen. Deckel drauf lassen. Nicht zusammenpressen — Sortieranlage braucht das Volumen zur Erkennung.',
     accepts: [
       'Plastikflaschen & -behälter',
       'Metalldosen & -büchsen',
-      'Tetra Paks & Verbundkartons',
-      'Alufolie (sauber)',
+      'Tetra Paks & Verbundverpackungen',
+      'Alufolie & Alutabletts (sauber)',
     ],
-    rejects: ['Plastiktüten', 'Styropor', 'Fettverschmutzte Verpackungen'],
+    rejects: ['Plastiktüten', 'Styropor', 'Fettverschmutzte Verpackungen', 'Glas'],
   },
-  blue: {
+  altpapier: {
     label: 'Papiertonne',
     color: 'var(--bin-blue)',
     textColor: 'white',
     bg: 'oklch(93% 0.04 235)',
     icon: '📄',
-    title: 'Papier & Pappe',
-    shortDesc: 'Sauberes Papier und Pappe',
+    title: 'Altpapier',
+    shortDesc: 'Zeitungen, Zeitschriften & Büropapier',
     instruction:
-      'Papier trocken halten. Pappkartons flach zusammenlegen. Plastikfenster aus Briefumschlägen entfernen.',
+      'Papier trocken und sauber einwerfen. Plastikfolien, Klebeband und Heftklammern wenn möglich entfernen.',
     accepts: [
       'Zeitungen & Zeitschriften',
-      'Büropapier',
-      'Pappkartons',
+      'Büropapier & Schulhefte',
       'Bücher & Kataloge',
+      'Briefumschläge (ohne Plastikfenster)',
     ],
-    rejects: ['Pizzakartons (fettig)', 'Gewachstes Papier', 'Taschentücher', 'Pappbecher'],
+    rejects: ['Beschichtetes Papier', 'Taschentücher & Servietten', 'Pappkartons', 'Pizzakartons (fettig)'],
   },
-  brown: {
+  karton: {
+    label: 'Kartonsammlung',
+    color: 'var(--bin-karton)',
+    textColor: 'white',
+    bg: 'oklch(95% 0.04 78)',
+    icon: '📦',
+    title: 'Karton',
+    shortDesc: 'Pappkartons & Wellpappe',
+    instruction:
+      'Kartons flach zusammenlegen und Klebeband entfernen. Zu Bündeln schnüren oder in die Papiertonne geben — je nach Gemeinde.',
+    accepts: [
+      'Pappkartons (flach gefaltet)',
+      'Wellpappe',
+      'Schuhkartons',
+      'Eierkartons',
+    ],
+    rejects: ['Fettige Pizzakartons', 'Beschichtete Kartons (Getränke)', 'Styropor'],
+  },
+  bioabfall: {
     label: 'Biotonne',
     color: 'var(--bin-brown)',
     textColor: 'white',
@@ -44,51 +62,51 @@ export const BINS = {
     title: 'Bioabfall',
     shortDesc: 'Lebensmittelreste & Gartenabfälle',
     instruction:
-      'Lebensmittelreste in Zeitung einwickeln oder kompostierbare Beutel verwenden. Bei Heimkompostern kein Fleisch oder Milchprodukte.',
+      'Lebensmittelreste in Zeitungspapier einwickeln oder kompostierbare Beutel verwenden. Biotonne nicht in die Sonne stellen.',
     accepts: [
       'Obst- & Gemüsereste',
-      'Kaffeesatz & Filter',
-      'Rasenschnitt',
-      'Eierschalen',
+      'Kaffeesatz, Filter & Teebeutel',
+      'Rasenschnitt & Laub',
+      'Eierschalen & Nussschalen',
     ],
-    rejects: ['Fleisch & Fisch (Heimkompost)', 'Milchprodukte', 'Öle & Fette'],
+    rejects: ['Fleisch & Fisch (nur kommunale Biotonne)', 'Milchprodukte', 'Öle & Fette', 'Plastiktüten'],
   },
-  black: {
+  altglas: {
+    label: 'Glascontainer',
+    color: 'var(--bin-green)',
+    textColor: 'white',
+    bg: 'oklch(93% 0.04 155)',
+    icon: '🍾',
+    title: 'Altglas',
+    shortDesc: 'Flaschen & Gläser nach Farbe trennen',
+    instruction:
+      'Flaschen und Gläser ausspülen. Deckel, Korken und Etiketten entfernen. Nach Farbe (Weiß-, Braun-, Grünglas) trennen.',
+    accepts: [
+      'Glasflaschen (Wein, Bier, Saft)',
+      'Einmachgläser & Marmeladengläser',
+      'Parfumflaschen',
+    ],
+    rejects: ['Fensterglas & Spiegelglas', 'Trinkgläser & Kristallglas', 'Keramik & Porzellan', 'Glühbirnen'],
+  },
+  restmuell: {
     label: 'Restmülltonne',
     color: 'var(--bin-black)',
     textColor: 'white',
     bg: 'oklch(93% 0.01 80)',
     icon: '🗑️',
     title: 'Restmüll',
-    shortDesc: 'Nicht recycelbarer Abfall',
+    shortDesc: 'Alles, was nicht recyclebar ist',
     instruction:
-      'Dies ist der letzte Ausweg. Wenn ein Artikel weder recycelt noch kompostiert werden kann, kommt er hier rein.',
+      'Nur Abfälle einwerfen, die in keine andere Tonne passen. Je weniger hier landet, desto besser.',
     accepts: [
-      'Verunreinigte Verpackungen',
+      'Verschmutzte Verpackungen',
       'Windeln & Hygieneprodukte',
       'Kaputtes Keramikgeschirr',
-      'Staubsaugerbeutel',
+      'Staubsaugerbeutel & Kehricht',
     ],
-    rejects: ['Sondermüll', 'Elektrogeräte', 'Batterien', 'Chemikalien'],
+    rejects: ['Sondermüll', 'Elektrogeräte', 'Batterien', 'Sperrmüll', 'Glas'],
   },
-  green: {
-    label: 'Glascontainer',
-    color: 'var(--bin-green)',
-    textColor: 'white',
-    bg: 'oklch(93% 0.04 155)',
-    icon: '🍾',
-    title: 'Glas',
-    shortDesc: 'Flaschen & Gläser',
-    instruction:
-      'Flaschen und Gläser ausspülen. Deckel und Korken entfernen. Zu einem Glascontainer in der Nähe bringen.',
-    accepts: [
-      'Glasflaschen (alle Farben)',
-      'Einmachgläser',
-      'Wein- & Bierflaschen',
-    ],
-    rejects: ['Fensterglas', 'Spiegel', 'Pyrex / ofenfestes Glas', 'Trinkgläser'],
-  },
-  special: {
+  sondermuell: {
     label: 'Sondermüll',
     color: 'var(--bin-orange)',
     textColor: 'white',
@@ -97,24 +115,44 @@ export const BINS = {
     title: 'Sondermüll',
     shortDesc: 'Batterien, Elektroschrott & Gefahrenstoffe',
     instruction:
-      'Nicht in den Hausmüll. Zu einem Recyclinghof, einem Händler-Rücknahmesystem oder einer ausgewiesenen Sammelstelle bringen.',
+      'Niemals in den Hausmüll. Zu einem Recyclinghof, einem Händler-Rücknahmesystem (z. B. Batterien im Supermarkt) oder einer Schadstoffsammlung bringen.',
     accepts: [
-      'Batterien',
-      'Elektrogeräte & Elektroschrott',
-      'Farben & Chemikalien',
-      'Leuchtstoffröhren',
+      'Batterien & Akkus',
+      'Elektro- & Elektronikgeräte',
+      'Farben, Lacke & Lösungsmittel',
+      'Medikamente & Chemikalien',
     ],
-    rejects: ['Niemals in den Hausmüll'],
+    rejects: ['Niemals in den Hausmüll', 'Niemals in die Restmülltonne'],
+  },
+  sperrmuell: {
+    label: 'Sperrmüll',
+    color: 'var(--bin-gray)',
+    textColor: 'white',
+    bg: 'oklch(93% 0.01 80)',
+    icon: '🛋️',
+    title: 'Sperrmüll',
+    shortDesc: 'Großmöbel & sperrige Gegenstände',
+    instruction:
+      'Sperrmüll per Abholung bei der Gemeinde anmelden oder zum Wertstoffhof bringen. Nicht einfach auf die Straße stellen.',
+    accepts: [
+      'Möbel & Matratzen',
+      'Teppiche & Vorhänge',
+      'Fahrräder & Kinderwagen',
+      'Große Haushaltsgeräte (ohne Kühlmittel)',
+    ],
+    rejects: ['Elektrogeräte mit Kühlmittel (Sondermüll)', 'Bauschutt', 'Reifen', 'Grünschnitt (Biotonne)'],
   },
 }
 
 export const DEMO_RESULTS = [
-  { bin: 'yellow', confidence: 0.91, items: ['Plastikflasche', 'PET-Behälter'] },
-  { bin: 'blue',   confidence: 0.87, items: ['Zeitung', 'Pappkarton'] },
-  { bin: 'brown',  confidence: 0.93, items: ['Apfelkern', 'Gemüseschalen'] },
-  { bin: 'black',  confidence: 0.78, items: ['Styropor', 'Verschmutzte Verpackung'] },
-  { bin: 'green',  confidence: 0.96, items: ['Glasflasche', 'Weinflasche'] },
-  { bin: 'special',confidence: 0.88, items: ['Batterie', 'Altes Handy'] },
+  { bin: 'leichtverpackungen', confidence: 0.91, items: ['Plastikflasche', 'PET-Behälter'] },
+  { bin: 'altpapier',          confidence: 0.87, items: ['Zeitung', 'Büropapier'] },
+  { bin: 'karton',             confidence: 0.89, items: ['Pappkarton', 'Wellpappe'] },
+  { bin: 'bioabfall',          confidence: 0.93, items: ['Apfelkern', 'Gemüseschalen'] },
+  { bin: 'altglas',            confidence: 0.96, items: ['Glasflasche', 'Weinflasche'] },
+  { bin: 'restmuell',          confidence: 0.78, items: ['Styropor', 'Verschmutzte Verpackung'] },
+  { bin: 'sondermuell',        confidence: 0.88, items: ['Batterie', 'Altes Handy'] },
+  { bin: 'sperrmuell',         confidence: 0.82, items: ['Stuhl', 'Tischbein'] },
 ]
 
 export const FAQS = [
