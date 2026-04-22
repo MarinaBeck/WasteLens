@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WasteLense — Scan Your Waste</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script>
+    // Teachable Machine is loaded on-demand only when a real model URL is provided.
+    // In demo mode (TM_MODEL_URL = null) this script is not needed.
+    window.tmImage = null;
+  </script>
+
+  <style>
+    /* ─── Tokens ─── */
+    :root {
+      --cream:       oklch(96.5% 0.012 82);
+      --cream-deep:  oklch(93%   0.018 80);
+      --forest:      oklch(31%   0.095 148);
+      --forest-mid:  oklch(44%   0.1   148);
+      --sage:        oklch(72%   0.09  145);
+      --sage-light:  oklch(89%   0.055 142);
+      --clay:        oklch(55%   0.09  52);
+      --clay-light:  oklch(88%   0.04  60);
+      --ink:         oklch(18%   0.02  80);
+      --muted:       oklch(48%   0.02  80);
+      --border:      oklch(86%   0.025 90);
+
+      --bin-yellow:  oklch(82%   0.14  88);
+      --bin-blue:    oklch(62%   0.12  235);
+      --bin-brown:   oklch(48%   0.09  55);
+      --bin-black:   oklch(22%   0.01  80);
+      --bin-green:   oklch(58%   0.13  155);
+      --bin-orange:  oklch(68%   0.14  48);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      /* subtle grain texture */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+
+    /* ─── Nav ─── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: oklch(96.5% 0.012 82 / 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Lora', serif; font-size: 1.25rem; font-weight: 700;
+      color: var(--forest); text-decoration: none; letter-spacing: -0.02em;
+    }
+    .nav-logo svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      font-size: 0.875rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--forest); }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding: 80px 48px 60px;
+      max-width: 860px; margin: 0 auto;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--sage-light); color: var(--forest-mid);
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 100px;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-family: 'Lora', serif; font-size: clamp(2.6rem, 5vw, 4rem);
+      font-weight: 700; line-height: 1.18; letter-spacing: -0.03em;
+      color: var(--forest);
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: var(--clay); }
+    .hero p {
+      font-size: 1.1rem; color: var(--muted); font-weight: 300;
+      max-width: 520px; margin: 0 auto;
+      text-wrap: pretty;
+    }
+
+    /* ─── Upload Zone ─── */
+    .scanner-section {
+      max-width: 760px; margin: 0 auto 80px;
+      padding: 0 48px;
+    }
+
+    .upload-zone {
+      position: relative;
+      border: 2px dashed var(--sage);
+      border-radius: 24px;
+      background: var(--cream-deep);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      overflow: hidden;
+      min-height: 340px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+    }
+    .upload-zone.drag-over {
+      border-color: var(--forest);
+      background: var(--sage-light);
+      transform: scale(1.01);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon {
+      width: 72px; height: 72px;
+      background: var(--sage-light); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    .upload-zone:hover .upload-icon { transform: translateY(-4px); }
+    .upload-zone-title {
+      font-family: 'Lora', serif; font-size: 1.3rem; font-weight: 600;
+      color: var(--forest);
+    }
+    .upload-zone-sub {
+      font-size: 0.875rem; color: var(--muted);
+    }
+    .upload-btn {
+      margin-top: 4px;
+      background: var(--forest); color: white;
+      border: none; border-radius: 100px;
+      padding: 11px 28px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 500; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      pointer-events: none; /* click propagates to file input */
+    }
+    .upload-zone:hover .upload-btn { background: var(--forest-mid); }
+
+    /* Preview image inside zone */
+    .preview-wrapper {
+      position: relative;
+      width: 100%; min-height: 340px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-img {
+      max-width: 100%; max-height: 420px;
+      border-radius: 22px; object-fit: contain;
+      display: block;
+    }
+    .preview-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, oklch(18% 0.02 80 / 0.55) 0%, transparent 50%);
+      border-radius: 22px;
+      display: flex; align-items: flex-end; padding: 24px;
+    }
+    .preview-change {
+      background: white; color: var(--forest);
+      border: none; border-radius: 100px;
+      padding: 8px 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .preview-change:hover { background: var(--sage-light); }
+
+    /* ─── Analyze Button ─── */
+    .analyze-area {
+      margin-top: 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .analyze-btn {
+      background: var(--forest); color: white;
+      border: none; border-radius: 100px;
+      padding: 16px 48px; font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px oklch(31% 0.095 148 / 0.3);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .analyze-btn:hover:not(:disabled) {
+      background: var(--forest-mid);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px oklch(31% 0.095 148 / 0.35);
+    }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .analyze-btn.loading { animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.65; } }
+
+    .privacy-note {
+      font-size: 0.78rem; color: var(--muted);
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* ─── Results ─── */
+    .result-card {
+      margin-top: 32px;
+      border-radius: 20px;
+      overflow: hidden;
+      animation: slideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      padding: 28px 32px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .result-bin-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; flex-shrink: 0;
+    }
+    .result-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+    .result-title { font-family: 'Lora', serif; font-size: 1.7rem; font-weight: 700; line-height: 1.2; }
+    .result-confidence {
+      margin-left: auto; text-align: right;
+    }
+    .result-confidence-num { font-size: 2rem; font-weight: 700; font-family: 'Lora', serif; }
+    .result-confidence-label { font-size: 0.75rem; opacity: 0.65; }
+
+    .result-body {
+      background: oklch(100% 0 0 / 0.45);
+      padding: 24px 32px 28px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    .result-info-block h4 {
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .result-info-block p { font-size: 0.93rem; font-weight: 400; text-wrap: pretty; }
+
+    .result-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    .result-tag {
+      font-size: 0.78rem; font-weight: 500;
+      padding: 4px 12px; border-radius: 100px;
+      background: oklch(0% 0 0 / 0.08);
+    }
+
+    /* ─── How It Works ─── */
+    .how-section {
+      background: var(--forest);
+      color: white;
+      padding: 80px 48px;
+      position: relative; overflow: hidden;
+    }
+    .how-section::before {
+      content: '';
+      position: absolute; top: -60px; left: -40px;
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, oklch(72% 0.09 145 / 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .how-inner { max-width: 860px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--sage); margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Lora', serif; font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 600; line-height: 1.2; letter-spacing: -0.02em;
+      margin-bottom: 48px;
+    }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step { display: flex; flex-direction: column; gap: 12px; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: oklch(100% 0 0 / 0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Lora', serif; font-weight: 700; color: var(--sage);
+    }
+    .step h3 { font-size: 1rem; font-weight: 600; }
+    .step p { font-size: 0.875rem; color: oklch(85% 0.02 145); text-wrap: pretty; line-height: 1.55; }
+
+    /* ─── Bins Guide ─── */
+    .bins-section {
+      padding: 80px 48px;
+      max-width: 960px; margin: 0 auto;
+    }
+    .bins-header { margin-bottom: 48px; }
+    .bins-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .bin-card {
+      border-radius: 18px; padding: 24px;
+      background: var(--cream-deep); border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .bin-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px oklch(0% 0 0 / 0.07); }
+    .bin-dot {
+      width: 44px; height: 44px; border-radius: 12px;
+      margin-bottom: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .bin-card h3 { font-size: 0.98rem; font-weight: 600; margin-bottom: 6px; color: var(--forest); }
+    .bin-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* ─── FAQ ─── */
+    .faq-section {
+      background: var(--cream-deep);
+      padding: 80px 48px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-inner { max-width: 720px; margin: 0 auto; }
+    .faq-section .section-label { color: var(--clay); }
+    .faq-list { display: flex; flex-direction: column; gap: 0; margin-top: 40px; }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-question {
+      width: 100%; background: none; border: none;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 22px 0;
+      font-family: 'DM Sans', sans-serif; font-size: 0.98rem; font-weight: 500;
+      color: var(--ink); cursor: pointer; text-align: left;
+      transition: color 0.2s;
+    }
+    .faq-question:hover { color: var(--forest); }
+    .faq-chevron {
+      flex-shrink: 0; width: 22px; height: 22px;
+      border-radius: 50%; background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.25s;
+    }
+    .faq-item.open .faq-chevron {
+      background: var(--sage-light);
+      transform: rotate(180deg);
+    }
+    .faq-answer {
+      overflow: hidden;
+      font-size: 0.9rem; color: var(--muted); line-height: 1.7;
+      max-height: 0;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      padding: 0;
+      text-wrap: pretty;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 500px;
+      padding-bottom: 20px;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      background: var(--forest); color: oklch(85% 0.03 148);
+      padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.82rem;
+    }
+    footer .logo { font-family: 'Lora', serif; color: white; font-weight: 700; }
+    footer a { color: oklch(72% 0.09 145); text-decoration: none; }
+    footer a:hover { color: white; }
+
+    /* ─── Tweaks Panel ─── */
+    #tweaks-panel {
+      display: none;
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: white; border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px;
+      box-shadow: 0 12px 40px oklch(0% 0 0 / 0.12);
+      width: 240px;
+    }
+    #tweaks-panel h3 {
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+    .tweak-row { margin-bottom: 14px; }
+    .tweak-row label { font-size: 0.8rem; font-weight: 500; color: var(--ink); display: block; margin-bottom: 6px; }
+    .tweak-row input[type="range"] { width: 100%; accent-color: var(--forest); }
+    .tweak-row select {
+      width: 100%; padding: 6px 10px; border-radius: 8px;
+      border: 1px solid var(--border); font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; background: var(--cream); color: var(--ink);
+    }
+
+    @media (max-width: 680px) {
+      nav { padding: 16px 20px; }
+      .hero, .scanner-section, .bins-section, .faq-section, footer { padding-left: 20px; padding-right: 20px; }
+      .steps-grid, .bins-grid { grid-template-columns: 1fr; }
+      .result-body { grid-template-columns: 1fr; }
+      .how-section { padding: 60px 20px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="13" fill="oklch(89% 0.055 142)"/>
+        <path d="M14 6C10 6 7 9 7 13c0 3 1.5 5.5 4 6.5V22h6v-2.5c2.5-1 4-3.5 4-6.5 0-4-3-7-7-7z" fill="oklch(31% 0.095 148)"/>
+        <path d="M11 13c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z" fill="oklch(89% 0.055 142)"/>
+      </svg>
+      WasteLense
+    </a>
+    <nav class="nav-links">
+      <a href="#scanner">Scan</a>
+      <a href="#bins-guide">Bins Guide</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </nav>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useCallback, useEffect } = React;
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accentMode": "forest",
+      "cornerRadius": 24,
+      "fontScale": 1
+    }/*EDITMODE-END*/;
+
+    // ── Bin definitions ──────────────────────────────────────────────
+    const BINS = {
+      yellow: {
+        label: "Yellow Bin", color: "var(--bin-yellow)", textColor: "oklch(30% 0.08 75)",
+        bg: "oklch(96% 0.06 88)", icon: "♻️",
+        title: "Recyclables", shortDesc: "Plastics, metals & cartons",
+        instruction: "Empty and rinse containers before placing them in the yellow bin. Flatten cardboard where possible.",
+        accepts: ["Plastic bottles & containers", "Metal cans & tins", "Tetra Paks & cartons", "Aluminium foil (clean)"],
+        rejects: ["Plastic bags", "Styrofoam", "Greasy packaging"]
+      },
+      blue: {
+        label: "Blue Bin", color: "var(--bin-blue)", textColor: "white",
+        bg: "oklch(93% 0.04 235)", icon: "📄",
+        title: "Paper & Cardboard",  shortDesc: "Clean paper and card",
+        instruction: "Keep paper dry. Flatten cardboard boxes. Remove any plastic windows from envelopes.",
+        accepts: ["Newspapers & magazines", "Office paper", "Cardboard boxes", "Books & catalogues"],
+        rejects: ["Pizza boxes (greasy)", "Waxed paper", "Tissue paper", "Paper cups"]
+      },
+      brown: {
+        label: "Brown Bin", color: "var(--bin-brown)", textColor: "white",
+        bg: "oklch(94% 0.025 65)", icon: "🌿",
+        title: "Organic Waste", shortDesc: "Food scraps & garden waste",
+        instruction: "Wrap food scraps in newspaper or use compostable bags. Avoid meat and dairy in home composters.",
+        accepts: ["Fruit & vegetable scraps", "Coffee grounds & filters", "Grass clippings", "Eggshells"],
+        rejects: ["Meat & fish (home compost)", "Dairy products", "Oils & fats"]
+      },
+      black: {
+        label: "Black Bin", color: "var(--bin-black)", textColor: "white",
+        bg: "oklch(93% 0.01 80)", icon: "🗑️",
+        title: "Residual Waste", shortDesc: "Non-recyclable waste",
+        instruction: "This is your last resort. If an item cannot be recycled or composted, place it here.",
+        accepts: ["Contaminated packaging", "Nappies & hygiene products", "Broken ceramics", "Vacuum cleaner bags"],
+        rejects: ["Hazardous waste", "Electronics", "Batteries", "Chemicals"]
+      },
+      green: {
+        label: "Glass Bank", color: "var(--bin-green)", textColor: "white",
+        bg: "oklch(93% 0.04 155)", icon: "🍾",
+        title: "Glass", shortDesc: "Bottles & jars",
+        instruction: "Rinse bottles and jars. Remove lids and corks. Take to a glass bank or bottle bank near you.",
+        accepts: ["Glass bottles (all colours)", "Glass jars", "Wine & beer bottles"],
+        rejects: ["Window glass", "Mirrors", "Pyrex / ovenware", "Drinking glasses"]
+      },
+      special: {
+        label: "Special Disposal", color: "var(--bin-orange)", textColor: "white",
+        bg: "oklch(95% 0.05 55)", icon: "⚠️",
+        title: "Special Disposal", shortDesc: "Batteries, electronics & hazardous",
+        instruction: "Do not put in any household bin. Bring to a recycling centre, retailer take-back scheme, or designated collection point.",
+        accepts: ["Batteries", "Electronics & e-waste", "Paints & chemicals", "Fluorescent bulbs"],
+        rejects: ["Never in household bins"]
+      }
+    };
+
+    // Demo classification — maps common image patterns to bins
+    // In production, replace this with your Teachable Machine model URL
+    const TM_MODEL_URL = null; // Set to your Teachable Machine model URL e.g. "https://teachablemachine.withgoogle.com/models/XXXX/"
+
+    const DEMO_RESULTS = [
+      { bin: "yellow", confidence: 0.91, items: ["Plastic bottle", "PET container"] },
+      { bin: "blue", confidence: 0.87, items: ["Newspaper", "Cardboard box"] },
+      { bin: "brown", confidence: 0.93, items: ["Apple core", "Vegetable peel"] },
+      { bin: "black", confidence: 0.78, items: ["Styrofoam", "Contaminated packaging"] },
+      { bin: "green", confidence: 0.96, items: ["Glass bottle", "Wine bottle"] },
+      { bin: "special", confidence: 0.88, items: ["Battery", "Old phone"] },
+    ];
+
+    // ── ResultCard ───────────────────────────────────────────────────
+    function ResultCard({ result }) {
+      const bin = BINS[result.bin];
+      if (!bin) return null;
+      return (
+        <div className="result-card" style={{ background: bin.bg, border: `1.5px solid ${bin.color}22` }}>
+          <div className="result-header" style={{ color: bin.textColor === "white" ? bin.color : bin.textColor }}>
+            <div className="result-bin-icon" style={{ background: bin.color + "22" }}>
+              <span style={{ fontSize: "1.8rem" }}>{bin.icon}</span>
+            </div>
+            <div>
+              <div className="result-label" style={{ color: bin.color }}>{bin.label}</div>
+              <div className="result-title" style={{ color: "var(--ink)" }}>{bin.title}</div>
+              <div style={{ fontSize: "0.875rem", color: "var(--muted)", marginTop: 2 }}>{bin.shortDesc}</div>
+            </div>
+            <div className="result-confidence">
+              <div className="result-confidence-num" style={{ color: bin.color }}>
+                {Math.round(result.confidence * 100)}%
+              </div>
+              <div className="result-confidence-label" style={{ color: "var(--muted)" }}>confidence</div>
+            </div>
+          </div>
+          <div className="result-body">
+            <div className="result-info-block">
+              <h4>What to do</h4>
+              <p>{bin.instruction}</p>
+            </div>
+            <div className="result-info-block">
+              <h4>Detected as</h4>
+              <div className="result-tags">
+                {result.items.map(t => (
+                  <span key={t} className="result-tag" style={{ background: bin.color + "18", color: "var(--ink)" }}>{t}</span>
+                ))}
+              </div>
+              <h4 style={{ marginTop: 14 }}>Also accepts</h4>
+              <div className="result-tags">
+                {bin.accepts.slice(0, 3).map(t => (
+                  <span key={t} className="result-tag" style={{ background: "oklch(0% 0 0 / 0.06)", color: "var(--muted)" }}>{t}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── FAQItem ──────────────────────────────────────────────────────
+    function FAQItem({ q, a }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <div className={`faq-item${open ? " open" : ""}`}>
+          <button className="faq-question" onClick={() => setOpen(o => !o)}>
+            <span>{q}</span>
+            <span className="faq-chevron">
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+          </button>
+          <div className="faq-answer">{a}</div>
+        </div>
+      );
+    }
+
+    // ── BinCard ──────────────────────────────────────────────────────
+    function BinCard({ binKey }) {
+      const bin = BINS[binKey];
+      return (
+        <div className="bin-card">
+          <div className="bin-dot" style={{ background: bin.color + "22" }}>
+            <span>{bin.icon}</span>
+          </div>
+          <h3>{bin.title}</h3>
+          <p>{bin.accepts.slice(0,3).join(", ")}</p>
+        </div>
+      );
+    }
+
+    // ── Main App ─────────────────────────────────────────────────────
+    function App() {
+      const [image, setImage] = useState(null);       // data URL
+      const [dragging, setDragging] = useState(false);
+      const [analyzing, setAnalyzing] = useState(false);
+      const [result, setResult] = useState(null);
+      const [tweaksOpen, setTweaksOpen] = useState(false);
+      const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+      const fileRef = useRef();
+      const imgRef = useRef();
+      const modelRef = useRef(null);
+      const resultRef = useRef(null);
+
+      // Tweaks host protocol
+      useEffect(() => {
+        const handler = (e) => {
+          if (e.data?.type === '__activate_edit_mode')   setTweaksOpen(true);
+          if (e.data?.type === '__deactivate_edit_mode') setTweaksOpen(false);
+        };
+        window.addEventListener('message', handler);
+        window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+        return () => window.removeEventListener('message', handler);
+      }, []);
+
+      const applyTweak = (key, value) => {
+        const next = { ...tweaks, [key]: value };
+        setTweaks(next);
+        window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*');
+        if (key === 'cornerRadius') {
+          document.documentElement.style.setProperty('--corner', value + 'px');
+        }
+      };
+
+      const handleFile = (file) => {
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => { setImage(e.target.result); setResult(null); };
+        reader.readAsDataURL(file);
+      };
+
+      const onDrop = useCallback((e) => {
+        e.preventDefault(); setDragging(false);
+        handleFile(e.dataTransfer.files[0]);
+      }, []);
+
+      const loadModel = async () => {
+        if (modelRef.current || !TM_MODEL_URL) return;
+        try {
+          const modelURL = TM_MODEL_URL + "model.json";
+          const metaURL  = TM_MODEL_URL + "metadata.json";
+          modelRef.current = await tmImage.load(modelURL, metaURL);
+        } catch(e) { console.warn("TM model not loaded:", e); }
+      };
+
+      const analyze = async () => {
+        if (!image) return;
+        setAnalyzing(true);
+        setResult(null);
+
+        try {
+          // Try real Teachable Machine model first
+          if (TM_MODEL_URL) {
+            await loadModel();
+          }
+
+          if (modelRef.current && imgRef.current) {
+            const predictions = await modelRef.current.predict(imgRef.current);
+            const top = predictions.sort((a,b) => b.probability - a.probability)[0];
+            // Map class name to bin key — adjust this mapping for your model
+            const binMap = {
+              "plastic": "yellow", "metal": "yellow", "can": "yellow",
+              "paper": "blue", "cardboard": "blue",
+              "organic": "brown", "food": "brown",
+              "glass": "green",
+              "battery": "special", "electronics": "special",
+              "trash": "black", "other": "black"
+            };
+            const binKey = Object.entries(binMap).find(([k]) => top.className.toLowerCase().includes(k))?.[1] || "black";
+            setResult({ bin: binKey, confidence: top.probability, items: [top.className] });
+          } else {
+            // Demo mode: simulate a plausible result
+            await new Promise(r => setTimeout(r, 1800));
+            const pick = DEMO_RESULTS[Math.floor(Math.random() * DEMO_RESULTS.length)];
+            setResult(pick);
+          }
+        } catch(e) {
+          console.error(e);
+          setAnalyzing(false);
+          return;
+        }
+
+        setAnalyzing(false);
+        setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 100);
+      };
+
+      const FAQs = [
+        {
+          q: "Where are my photos processed?",
+          a: "Your photos are analyzed entirely within your browser using a locally-loaded AI model powered by Teachable Machine (Google). The image data is never uploaded to our servers or any external service. Processing happens 100% on your device."
+        },
+        {
+          q: "Do you store or share my images?",
+          a: "No. We do not store, retain, or share any images you upload. Once you close or refresh the page, all image data is permanently discarded from your device's memory. We have no server-side storage for user-submitted photos."
+        },
+        {
+          q: "What data does WasteLense collect?",
+          a: "WasteLense collects no personal data. We do not use cookies for tracking, we do not collect IP addresses linked to image submissions, and we do not use analytics that identify individual users. The only local data stored is the AI model weights, cached in your browser for performance."
+        },
+        {
+          q: "Is the AI classification always accurate?",
+          a: "The model is trained on a broad dataset of common household waste items and achieves high accuracy for typical items. However, AI classification is not perfect — for unusual, mixed, or difficult-to-identify items, please refer to your local authority's waste guidelines or the bins guide below."
+        },
+        {
+          q: "What AI technology powers the classification?",
+          a: "WasteLense uses Google's Teachable Machine image classification framework, which runs directly in your browser using TensorFlow.js. The model weights are loaded once and cached locally. No internet connection is required after the initial model load."
+        },
+        {
+          q: "My local recycling rules are different — what should I do?",
+          a: "Recycling rules vary significantly by municipality and country. The guidance shown is a general best-practice baseline (common in Central Europe / DACH region). Always defer to your local waste management authority's specific guidelines when in doubt."
+        },
+        {
+          q: "How can I improve my waste sorting?",
+          a: "The single biggest improvement is to rinse containers before recycling — contaminated packaging is often rejected and sent to landfill. Also, keep different waste streams separate and never 'wish-cycle' (putting something in recycling hoping it might be recyclable — when in doubt, it goes in the black bin)."
+        }
+      ];
+
+      return (
+        <>
+          {/* ── Hero ── */}
+          <section className="hero">
+            <div className="hero-eyebrow">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <circle cx="6" cy="6" r="5" fill="oklch(44% 0.1 148)"/>
+                <path d="M4 6l1.5 1.5L8 4" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              AI-powered waste sorting
+            </div>
+            <h1>Sort your waste <em>correctly</em>,<br/>every single time.</h1>
+            <p>
+              Snap or upload a photo of any waste item. WasteLense identifies it
+              and tells you exactly which bin it belongs in — no guessing, no contamination.
+            </p>
+          </section>
+
+          {/* ── Scanner ── */}
+          <section className="scanner-section" id="scanner">
+            {!image ? (
+              <div
+                className={`upload-zone${dragging ? " drag-over" : ""}`}
+                onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={onDrop}
+              >
+                <input
+                  ref={fileRef}
+                  type="file" accept="image/*"
+                  onChange={e => handleFile(e.target.files[0])}
+                />
+                <div className="upload-icon">
+                  <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+                    <path d="M15 20V10M10 15l5-5 5 5" stroke="oklch(44% 0.1 148)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <rect x="4" y="4" width="22" height="22" rx="5" stroke="oklch(72% 0.09 145)" strokeWidth="1.5" fill="none"/>
+                  </svg>
+                </div>
+                <div className="upload-zone-title">Drop your waste photo here</div>
+                <div className="upload-zone-sub">or click to browse — JPG, PNG, WebP up to 20 MB</div>
+                <button className="upload-btn">Choose image</button>
+              </div>
+            ) : (
+              <div className="upload-zone" style={{ border: "2px solid var(--sage)", padding: 0 }}>
+                <div className="preview-wrapper">
+                  <img
+                    ref={imgRef}
+                    src={image}
+                    className="preview-img"
+                    alt="Uploaded waste"
+                    crossOrigin="anonymous"
+                  />
+                  <div className="preview-overlay">
+                    <button className="preview-change" onClick={() => { setImage(null); setResult(null); }}>
+                      ← Change photo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="analyze-area">
+              <button
+                className={`analyze-btn${analyzing ? " loading" : ""}`}
+                onClick={analyze}
+                disabled={!image || analyzing}
+              >
+                {analyzing ? (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ animation: "spin 1s linear infinite" }}>
+                      <circle cx="9" cy="9" r="7" stroke="white" strokeWidth="2" strokeDasharray="22 10" strokeLinecap="round"/>
+                    </svg>
+                    Analysing…
+                  </>
+                ) : (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <circle cx="8" cy="8" r="6" stroke="white" strokeWidth="2"/>
+                      <path d="M13 13l3 3" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M5.5 8h5M8 5.5v5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Analyse Waste
+                  </>
+                )}
+              </button>
+              <span className="privacy-note">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M6 1L2 3v3c0 2.5 1.7 4.7 4 5 2.3-.3 4-2.5 4-5V3L6 1z" stroke="oklch(55% 0.09 52)" strokeWidth="1.2" fill="none"/>
+                  <path d="M4 6l1.5 1.5L8 4" stroke="oklch(55% 0.09 52)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Processed locally in your browser · no data sent to servers
+              </span>
+            </div>
+
+            {result && (
+              <div ref={resultRef}>
+                <ResultCard result={result} />
+              </div>
+            )}
+          </section>
+
+          {/* ── How It Works ── */}
+          <section className="how-section">
+            <div className="how-inner">
+              <div className="section-label">How it works</div>
+              <h2 className="section-title">From photo to sorted<br/>in under two seconds.</h2>
+              <div className="steps-grid">
+                <div className="step">
+                  <div className="step-num">1</div>
+                  <h3>Upload a photo</h3>
+                  <p>Take a clear photo of the waste item or upload one from your gallery. The model works best with a single item against a plain background.</p>
+                </div>
+                <div className="step">
+                  <div className="step-num">2</div>
+                  <h3>AI classifies in-browser</h3>
+                  <p>A Teachable Machine model runs entirely on your device using TensorFlow.js — no image ever leaves your browser. Fast, private, offline-capable.</p>
+                </div>
+                <div className="step">
+                  <div className="step-num">3</div>
+                  <h3>Get your bin + tips</h3>
+                  <p>See the correct bin, a confidence score, preparation instructions and a list of similar items the bin accepts — everything you need to sort correctly.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Bins Guide ── */}
+          <section className="bins-section" id="bins-guide">
+            <div className="bins-header">
+              <div className="section-label" style={{ color: "var(--clay)" }}>Bins Guide</div>
+              <h2 className="section-title" style={{ color: "var(--forest)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}>
+                Know your bins at a glance.
+              </h2>
+            </div>
+            <div className="bins-grid">
+              {Object.keys(BINS).map(k => <BinCard key={k} binKey={k} />)}
+            </div>
+          </section>
+
+          {/* ── FAQ ── */}
+          <section className="faq-section" id="faq">
+            <div className="faq-inner">
+              <div className="section-label">FAQ</div>
+              <h2 className="section-title" style={{ color: "var(--forest)", fontSize: "clamp(1.8rem, 3vw, 2.4rem)" }}>
+                Privacy, data & how it all works.
+              </h2>
+              <div className="faq-list">
+                {FAQs.map(f => <FAQItem key={f.q} q={f.q} a={f.a} />)}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Footer ── */}
+          <footer>
+            <div>
+              <div className="logo">WasteLense</div>
+              <div style={{ marginTop: 6 }}>Making recycling effortless · {new Date().getFullYear()}</div>
+            </div>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <a href="#faq">Privacy</a>
+              <a href="#faq">Data Protection</a>
+              <a href="#scanner">Scan Waste</a>
+            </div>
+          </footer>
+
+          {/* ── Tweaks Panel ── */}
+          <div id="tweaks-panel" style={{ display: tweaksOpen ? "block" : "none" }}>
+            <h3>Tweaks</h3>
+            <div className="tweak-row">
+              <label>Card corner radius: {tweaks.cornerRadius}px</label>
+              <input type="range" min="8" max="32" value={tweaks.cornerRadius}
+                onChange={e => applyTweak("cornerRadius", +e.target.value)} />
+            </div>
+            <div className="tweak-row">
+              <label>Accent color</label>
+              <select value={tweaks.accentMode} onChange={e => applyTweak("accentMode", e.target.value)}>
+                <option value="forest">Forest Green</option>
+                <option value="clay">Warm Clay</option>
+                <option value="sage">Sage</option>
+              </select>
+            </div>
+            <div className="tweak-row">
+              <label>Demo result</label>
+              <select onChange={e => setResult(DEMO_RESULTS[+e.target.value])}>
+                {DEMO_RESULTS.map((r,i) => <option key={i} value={i}>{BINS[r.bin].title}</option>)}
+              </select>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+
+  <template id="__bundler_thumbnail">
+    <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+      <rect width="120" height="80" fill="oklch(96.5% 0.012 82)"/>
+      <circle cx="60" cy="32" r="18" fill="oklch(89% 0.055 142)"/>
+      <path d="M60 20C52 20 46 26 46 34c0 5 3 9 7 11v5h14v-5c4-2 7-6 7-11 0-8-6-14-14-14z" fill="oklch(31% 0.095 148)"/>
+      <rect x="20" y="60" width="80" height="6" rx="3" fill="oklch(72% 0.09 145)"/>
+    </svg>
+  </template>
+
+</body>
+</html>

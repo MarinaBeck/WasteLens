@@ -1,0 +1,61 @@
+/* ── Design Tokens ── */
+:root {
+  --cream:       oklch(96.5% 0.012 82);
+  --cream-deep:  oklch(93%   0.018 80);
+  --forest:      oklch(31%   0.095 148);
+  --forest-mid:  oklch(44%   0.1   148);
+  --sage:        oklch(72%   0.09  145);
+  --sage-light:  oklch(89%   0.055 142);
+  --clay:        oklch(55%   0.09  52);
+  --clay-light:  oklch(88%   0.04  60);
+  --ink:         oklch(18%   0.02  80);
+  --muted:       oklch(48%   0.02  80);
+  --border:      oklch(86%   0.025 90);
+
+  --bin-yellow:  oklch(82%   0.14  88);
+  --bin-blue:    oklch(62%   0.12  235);
+  --bin-brown:   oklch(48%   0.09  55);
+  --bin-black:   oklch(22%   0.01  80);
+  --bin-green:   oklch(58%   0.13  155);
+  --bin-orange:  oklch(68%   0.14  48);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+#app {
+  min-height: 100vh;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
