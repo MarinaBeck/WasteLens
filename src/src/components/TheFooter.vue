@@ -3,13 +3,16 @@
     <div>
       <div class="logo">WasteLense</div>
       <div class="tagline">Mülltrennung leicht gemacht · {{ new Date().getFullYear() }}</div>
-      <div>Link zum Kaggle-Datensatz</div>
     </div>
     <div class="footer-links">
-      <a href="#faq">Datenschutz</a>
+      <a href="#" @click.prevent="$emit('open-impressum')">Impressum & Datenschutz</a>
     </div>
   </footer>
 </template>
+
+<script setup>
+defineEmits(['open-impressum'])
+</script>
 
 <style scoped>
 footer {
