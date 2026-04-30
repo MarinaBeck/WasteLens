@@ -5,11 +5,11 @@ import TheNavBar from './components/TheNavBar.vue'
 import HeroSection from './components/HeroSection.vue'
 import UploadZone from './components/UploadZone.vue'
 import ResultCard from './components/ResultCard.vue'
-import HowItWorks from './components/HowItWorks.vue'
 import BinsGuide from './components/BinsGuide.vue'
 import FAQSection from './components/FAQSection.vue'
 import TheFooter from './components/TheFooter.vue'
 import ImpressumPage from './components/ImpressumPage.vue'
+import VideoGuide from './components/VideoGuide.vue'
 
 const showImpressum = ref(false)
 
@@ -94,9 +94,10 @@ function clearImage() {
 </script>
 
 <template>
-  <TheNavBar />
   <ImpressumPage v-if="showImpressum" @close="closeImpressum" />
-  <main v-else>
+  <template v-else>
+  <TheNavBar />
+  <main>
     <HeroSection />
 
     <section class="scanner-section" id="scanner">
@@ -140,11 +141,12 @@ function clearImage() {
       </div>
     </section>
 
-    <HowItWorks />
+    <VideoGuide />
     <BinsGuide />
     <FAQSection />
   </main>
   <TheFooter @open-impressum="openImpressum" />
+  </template>
 </template>
 
 <style scoped>
