@@ -9,6 +9,19 @@ import HowItWorks from './components/HowItWorks.vue'
 import BinsGuide from './components/BinsGuide.vue'
 import FAQSection from './components/FAQSection.vue'
 import TheFooter from './components/TheFooter.vue'
+import ImpressumPage from './components/ImpressumPage.vue'
+
+const showImpressum = ref(false)
+
+function openImpressum() {
+  showImpressum.value = true
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function closeImpressum() {
+  showImpressum.value = false
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 const image = ref(null)       // data URL of uploaded image
 const analyzing = ref(false)
@@ -82,7 +95,8 @@ function clearImage() {
 
 <template>
   <TheNavBar />
-  <main>
+  <ImpressumPage v-if="showImpressum" @close="closeImpressum" />
+  <main v-else>
     <HeroSection />
 
     <section class="scanner-section" id="scanner">
@@ -130,7 +144,7 @@ function clearImage() {
     <BinsGuide />
     <FAQSection />
   </main>
-  <TheFooter />
+  <TheFooter @open-impressum="openImpressum" />
 </template>
 
 <style scoped>

@@ -12,10 +12,23 @@
       Foto eines Abfallartikels aufnehmen oder hochladen. WasteLense erkennt ihn
       und sagt dir genau, in welche Tonne er gehört — kein Raten, keine Fehlsortierung.
     </p>
+    <div class="hero-actions">
+      <ShareButton />
+    </div>
   </section>
 </template>
 
+<script setup>
+import ShareButton from './ShareButton.vue'
+</script>
+
 <style scoped>
+.hero-actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
 .hero {
   padding: 80px 48px 60px;
   max-width: 860px;
