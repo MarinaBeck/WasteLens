@@ -186,6 +186,36 @@ export const FAQS = [
   },
 ]
 
-// Teachable Machine model URL — set to your model URL to enable real classification
-// e.g. "https://teachablemachine.withgoogle.com/models/XXXX/"
-export const TM_MODEL_URL = null
+// ─────────────────────────────────────────────────────────────
+// Teachable Machine — Modell-Konfiguration
+// ─────────────────────────────────────────────────────────────
+// Beide URLs werden vom Team gesetzt, sobald das trainierte Modell
+// verfügbar ist. Standard-Konvention: model.json und metadata.json
+// liegen unter derselben Basis-URL.
+// Beispiel: "https://teachablemachine.withgoogle.com/models/XXXX/"
+// Dateien liegen in src/public/tm-model/ und werden von Vite unter
+// /tm-model/ ausgeliefert (model.json + weights.bin + metadata.json).
+export const TM_MODEL_URL = '/tm-model/'
+export const TM_METADATA_URL = null
+
+// ─────────────────────────────────────────────────────────────
+// HCAI Prinzip 3 (Verlässlichkeit & Sicherheit)
+// ─────────────────────────────────────────────────────────────
+// Schwellwerte für die Konfidenz-Auswertung der Top-1-Klasse.
+//   >= HIGH      → normale Empfehlung
+//   >= LOW       → Empfehlung + sichtbare Warnung
+//   <  LOW       → HARD-STOP, keine Empfehlung
+// Die Werte werden bewusst konservativ gewählt, um Automation
+// Bias (übermäßiges Vertrauen in die KI) zu vermeiden.
+export const CONFIDENCE_THRESHOLDS = {
+  HIGH: 0.70,
+  LOW: 0.60,
+}
+
+// Quellen-Verweis für die transparente Regel-Anzeige (Stufe 3).
+// Lokales PDF (liegt unter src/public/abfall-trenn-abc.pdf) —
+// wird unabhängig von externer Verfügbarkeit ausgeliefert und
+// verlässt die App-Domain nicht.
+export const ABF_OOE_URL = '/abfall-trenn-abc.pdf'
+export const ABF_OOE_LABEL = 'Abfall-Trenn-ABC (PDF)'
+

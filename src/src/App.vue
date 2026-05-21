@@ -1,9 +1,17 @@
 <script setup>
-import { ref } from 'vue'
-import { BINS, DEMO_RESULTS, TM_MODEL_URL } from './data/waste.js'
+import { ref, computed } from 'vue'
+import { ABF_OOE_URL } from './data/waste.js'
+import { getRegel } from './data/disposalRules.js'
+import {
+  classify,
+  evaluateConfidence,
+  getTopK,
+  findPrediction,
+} from './lib/classification.js'
 import TheNavBar from './components/TheNavBar.vue'
 import HeroSection from './components/HeroSection.vue'
 import UploadZone from './components/UploadZone.vue'
+import ClassificationFeedback from './components/ClassificationFeedback.vue'
 import ResultCard from './components/ResultCard.vue'
 import BinsGuide from './components/BinsGuide.vue'
 import FAQSection from './components/FAQSection.vue'
@@ -23,57 +31,83 @@ function closeImpressum() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const image = ref(null)       // data URL of uploaded image
+// ─────────────────────────────────────────────────────────────
+// Zustand der Klassifikations-Pipeline
+// ─────────────────────────────────────────────────────────────
+const image = ref(null)             // data URL of uploaded image
 const analyzing = ref(false)
-const result = ref(null)
+const imgEl = ref(null)             // DOM <img> reference
+
+const predictions = ref(null)       // vollständiges TM-Result (Array)
+const selectedClass = ref(null)     // vom User gewählte Klasse (Stufe 2)
+const contamination = ref(null)     // 'sauber' | 'leicht' | 'stark'
+const modelError = ref(false)       // Modell konnte nicht geladen werden
+
 const resultEl = ref(null)
-const imgEl = ref(null)
 
-let modelCache = null
+// ─────────────────────────────────────────────────────────────
+// Computed: aktive Klasse (Top-1 ODER User-Auswahl)
+// HCAI Prinzip 4: User-Reselection hat Vorrang vor Modell-Top-1.
+// ─────────────────────────────────────────────────────────────
+const aktiveKlasse = computed(() => {
+  if (selectedClass.value) return selectedClass.value
+  const top = getTopK(predictions.value ?? [], 1)[0]
+  return top?.className ?? null
+})
 
-async function loadModel() {
-  if (modelCache || !TM_MODEL_URL) return
-  try {
-    modelCache = await window.tmImage.load(
-      TM_MODEL_URL + 'model.json',
-      TM_MODEL_URL + 'metadata.json'
-    )
-  } catch (e) {
-    console.warn('TM-Modell konnte nicht geladen werden:', e)
-  }
-}
+const aktiveKonfidenz = computed(() => {
+  const p = findPrediction(predictions.value ?? [], aktiveKlasse.value)
+  return p?.probability ?? 0
+})
 
+const reliabilityStatus = computed(() => {
+  const top1 = getTopK(predictions.value ?? [], 1)[0]
+  return evaluateConfidence(top1?.probability ?? 0)
+})
+
+// HCAI Prinzip 5: "Manuelle Wahl" = User hat aktiv vom Modell-
+// Vorschlag abgewichen. Wird an ResultCard durchgereicht, damit
+// dort statt "%" "manuell gewählt" steht.
+const isManuelleWahl = computed(() => {
+  if (!selectedClass.value) return false
+  const top1 = getTopK(predictions.value ?? [], 1)[0]
+  return selectedClass.value !== top1?.className
+})
+
+// HCAI Prinzip 5: Regel wird erst aufgelöst, wenn beides vorliegt —
+// erkannte Klasse UND Pflicht-Eingabe Verschmutzung.
+const regel = computed(() => {
+  if (!aktiveKlasse.value || !contamination.value) return null
+  return getRegel(aktiveKlasse.value, contamination.value)
+})
+
+const showStage3 = computed(
+  () => reliabilityStatus.value !== 'reject' && regel.value !== null
+)
+
+// ─────────────────────────────────────────────────────────────
+// analyse — Bildklassifikation (HCAI Prinzip 3: client-side only)
+// ─────────────────────────────────────────────────────────────
 async function analyse() {
   if (!image.value || analyzing.value) return
   analyzing.value = true
-  result.value = null
+  predictions.value = null
+  selectedClass.value = null
+  contamination.value = null
+  modelError.value = false
 
   try {
-    if (TM_MODEL_URL) await loadModel()
-
-    if (modelCache && imgEl.value) {
-      const predictions = await modelCache.predict(imgEl.value)
-      const top = [...predictions].sort((a, b) => b.probability - a.probability)[0]
-      const binMap = {
-        plastic: 'leichtverpackungen', metal: 'leichtverpackungen', can: 'leichtverpackungen',
-        paper: 'altpapier',
-        cardboard: 'karton', box: 'karton',
-        organic: 'bioabfall', food: 'bioabfall',
-        glass: 'altglas',
-        battery: 'sondermuell', electronics: 'sondermuell', chemical: 'sondermuell',
-        furniture: 'sperrmuell', bulky: 'sperrmuell',
-        trash: 'restmuell', other: 'restmuell',
-      }
-      const key = Object.entries(binMap).find(([k]) =>
-        top.className.toLowerCase().includes(k)
-      )?.[1] ?? 'black'
-      result.value = { bin: key, confidence: top.probability, items: [top.className] }
+    const result = await classify(imgEl.value)
+    if (!result || result.length === 0) {
+      // Modell nicht geladen oder predict() lieferte nichts —
+      // wir setzen explizit den Fehler-State (kein stiller Fallback).
+      modelError.value = true
     } else {
-      await new Promise(r => setTimeout(r, 1800))
-      result.value = DEMO_RESULTS[Math.floor(Math.random() * DEMO_RESULTS.length)]
+      predictions.value = result
     }
   } catch (e) {
-    console.error(e)
+    console.error('Klassifikation fehlgeschlagen:', e)
+    modelError.value = true
   }
 
   analyzing.value = false
@@ -84,12 +118,29 @@ async function analyse() {
 
 function onImageSelected(dataUrl) {
   image.value = dataUrl
-  result.value = null
+  predictions.value = null
+  selectedClass.value = null
+  contamination.value = null
+  modelError.value = false
 }
 
 function clearImage() {
   image.value = null
-  result.value = null
+  predictions.value = null
+  selectedClass.value = null
+  contamination.value = null
+  modelError.value = false
+}
+
+function onSelectClass(className) {
+  // HCAI Prinzip 4: User wählt aktiv eine alternative Klasse.
+  // Verschmutzung wird zurückgesetzt — neue Klasse, neue Entscheidung.
+  selectedClass.value = className
+  contamination.value = null
+}
+
+function onSetContamination(value) {
+  contamination.value = value
 }
 </script>
 
@@ -136,8 +187,53 @@ function clearImage() {
         </span>
       </div>
 
-      <div v-if="result" ref="resultEl">
-        <ResultCard :result="result" />
+      <!-- Modell-Fehler: KI-Modell nicht ladbar -->
+      <div v-if="modelError" ref="resultEl" class="model-error-banner" role="alert">
+        <div class="model-error-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M11 6v6M11 15.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="model-error-body">
+          <h3>KI-Modell gerade nicht verfügbar</h3>
+          <p>
+            Das Klassifikations-Modell konnte nicht geladen werden. Bitte versuche es
+            später noch einmal oder lade die Seite neu.
+          </p>
+          <p>
+            <strong>Wenn du dir unsicher bist</strong>, wie du den Artikel entsorgen sollst,
+            frage die Mitarbeiter:innen in deinem nächsten Altstoffsammelzentrum (ASZ)
+            oder schau im
+            <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+            nach.
+          </p>
+        </div>
+      </div>
+
+      <!-- HCAI-Feedback-Bereich: Stufen 1, 2 und 3 -->
+      <div v-else-if="predictions" ref="resultEl">
+        <!-- Stufen 1 + 2: Reliability + Top-K + Verschmutzungs-Rückfrage -->
+        <ClassificationFeedback
+          :predictions="predictions"
+          :selected-class="selectedClass"
+          :contamination="contamination"
+          @select-class="onSelectClass"
+          @set-contamination="onSetContamination"
+        />
+
+        <!-- Stufe 3: Transparente Regel-Anzeige + Disclaimer -->
+        <ResultCard
+          v-if="showStage3"
+          :bin-key="regel.binKey"
+          :klasse="aktiveKlasse"
+          :konfidenz="aktiveKonfidenz"
+          :manuell="isManuelleWahl"
+          :verschmutzung="contamination"
+          :regeltext="regel.regeltext"
+          :quelle="regel.quelle"
+          :tonne="regel.tonne"
+        />
       </div>
     </section>
 
@@ -203,6 +299,49 @@ function clearImage() {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.model-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  margin-top: 32px;
+  background: oklch(95% 0.04 30);
+  border: 1.5px solid oklch(65% 0.18 30);
+  color: oklch(35% 0.15 30);
+  animation: slideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.model-error-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.model-error-body h3 {
+  font-family: 'Lora', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: inherit;
+}
+
+.model-error-body p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+
+.model-error-body p:last-child {
+  margin-bottom: 0;
+}
+
+.model-error-body a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 @media (max-width: 680px) {

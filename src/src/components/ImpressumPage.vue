@@ -25,6 +25,7 @@
           <li>Vanessa Maurer — <a href="mailto:s2410892020fhooe.at">s2410892020@fhooe.at</a></li>
           <li>Marina Beck — <a href="mailto:s2410892007@fhooe.at">s2410892007@fhooe.at</a></li>
           <li>Desiree Aichstill — <a href="mailto:s2410892003@fhooe.at">s2401892003@fhooe.at</a></li>
+          <li>Nathalie Döberl — <a href="mailto:s2410892010@fhooe.at">s2401892010@fhooe.at</a></li>
         </ul>
 
         <p class="contact-note">
@@ -166,18 +167,30 @@
             </a>
           </li>
           <li>
-            <a href="KAGGLE_LINK_2" target="_blank" rel="noopener">
+            <a href="https://www.kaggle.com/datasets/wasifmahmood01/custom-waste-classification-dataset" target="_blank" rel="noopener">
               <!-- Datensatz-Titel ergänzen -->
-              Datensatz 2
+              Custom Waste classification dataset — Wasif Mahmood
             </a>
           </li>
           <li>
-            <a href="KAGGLE_LINK_3" target="_blank" rel="noopener">
+            <a href="https://www.kaggle.com/datasets/preetishah/waste-classificationorganic-and-recyclable" target="_blank" rel="noopener">
               <!-- Datensatz-Titel ergänzen -->
-              Datensatz 3
+              Waste classification(organic and recyclable) — Preeti Shah
             </a>
           </li>
         </ul>
+        <p class="own-sources-note">
+          Alle weiteren auf dieser Website verwendeten Bilder, die nicht aus den
+          oben genannten Datensätzen stammen, wurden aus eigenen Quellen erstellt.
+        </p>
+
+        <h2>Quelle der Entsorgungsregeln</h2>
+        <p>
+          Die in WasteLense angezeigten Entsorgungsregeln basieren auf dem
+          <a href="/abfall-trenn-abc.pdf" target="_blank" rel="noopener">Abfall-Trenn-ABC (PDF)</a>
+          des oberösterreichischen Abfallwirtschaftsverbands. Das PDF wird zur Offline-
+          Verfügbarkeit lokal mit der Anwendung ausgeliefert.
+        </p>
       </section>
     </div>
   </div>
@@ -322,5 +335,11 @@ address {
 }
 .dataset-list li:last-child {
   border-bottom: none;
+}
+
+.own-sources-note {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  font-style: italic;
 }
 </style>

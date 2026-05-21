@@ -1,13 +1,38 @@
 <script setup>
+// ─────────────────────────────────────────────────────────────
+// ResultCard — Stufe 3 der HCAI-Feedback-Logik
+// ─────────────────────────────────────────────────────────────
+// HCAI Prinzip 5 (Menschliche Kontrolle): Zeigt zusätzlich zur
+// Bin-Karte den transparenten Regel-Block — Klasse, Konfidenz,
+// Verschmutzung, Regeltext, Quelle, Empfehlung — plus den
+// Disclaimer "Du hast das letzte Wort".
+// ─────────────────────────────────────────────────────────────
 import { computed } from 'vue'
-import { BINS } from '../data/waste.js'
+import { BINS, ABF_OOE_URL } from '../data/waste.js'
+import { VERSCHMUTZUNG_OPTIONEN, BESTAETIGT } from '../data/disposalRules.js'
 
 const props = defineProps({
-  result: Object,
+  // Empfehlung (legt fest welche Bin-Karte gerendert wird)
+  binKey: { type: String, required: true },
+  // Transparenz-Daten für die Regel-Box
+  klasse: { type: String, required: true },
+  konfidenz: { type: Number, required: true },     // 0..1
+  manuell: { type: Boolean, default: false },      // User hat aktiv vom Modell abgewichen
+  verschmutzung: { type: String, required: true }, // 'sauber' | 'leicht' | 'stark'
+  regeltext: { type: String, required: true },
+  quelle: { type: String, required: true },
+  tonne: { type: String, required: true },
 })
 
-const bin = computed(() => BINS[props.result.bin])
-const pct = computed(() => Math.round(props.result.confidence * 100))
+const bin = computed(() => BINS[props.binKey])
+const pct = computed(() => Math.round(props.konfidenz * 100))
+const verschmutzungLabel = computed(
+  () => VERSCHMUTZUNG_OPTIONEN.find(o => o.value === props.verschmutzung)?.label ?? props.verschmutzung
+)
+// Zeile "Verschmutzung laut deiner Angabe" nur bei Klassen mit
+// echter Verschmutzungs-Differenzierung anzeigen. Bei Bestätigungs-
+// Klassen würde die Zeile sonst nichts Sinnvolles zeigen.
+const zeigeVerschmutzung = computed(() => props.verschmutzung !== BESTAETIGT)
 </script>
 
 <template>
@@ -27,36 +52,70 @@ const pct = computed(() => Math.round(props.result.confidence * 100))
         <div class="result-desc">{{ bin.shortDesc }}</div>
       </div>
       <div class="result-confidence">
-        <div class="result-confidence-num" :style="{ color: bin.color }">{{ pct }}%</div>
-        <div class="result-confidence-label">Konfidenz</div>
+        <template v-if="!manuell">
+          <div class="result-confidence-num" :style="{ color: bin.color }">{{ pct }}%</div>
+          <div class="result-confidence-label">Übereinstimmung</div>
+        </template>
+        <div v-else class="result-manual-badge" :style="{ background: bin.color + '22', color: bin.color }">
+          manuell gewählt
+        </div>
       </div>
     </div>
 
-    <!-- Body -->
+    <!-- Body: Anleitung + erkannte/akzeptierte Items -->
     <div class="result-body">
       <div class="result-info-block">
         <h4>Was tun</h4>
         <p>{{ bin.instruction }}</p>
       </div>
       <div class="result-info-block">
-        <h4>Erkannt als</h4>
+        <h4>Nimmt auch an</h4>
         <div class="result-tags">
           <span
-            v-for="item in result.items"
+            v-for="item in bin.accepts.slice(0, 4)"
             :key="item"
             class="result-tag"
             :style="{ background: bin.color + '18', color: 'var(--ink)' }"
           >{{ item }}</span>
         </div>
-        <h4 style="margin-top: 14px;">Nimmt auch an</h4>
-        <div class="result-tags">
-          <span
-            v-for="item in bin.accepts.slice(0, 3)"
-            :key="item"
-            class="result-tag"
-            style="background: oklch(0% 0 0 / 0.06); color: var(--muted);"
-          >{{ item }}</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- STUFE 3 — Transparente Regel-Anzeige (HCAI Prinzip 5)   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="rule-block">
+      <h4 class="rule-heading">Angewendete Regel</h4>
+      <dl class="rule-list">
+        <div class="rule-row">
+          <dt>Erkannt:</dt>
+          <dd>{{ klasse }} <span class="rule-source">({{ manuell ? 'manuell gewählt' : pct + ' % Übereinstimmung' }})</span></dd>
         </div>
+        <div v-if="zeigeVerschmutzung" class="rule-row">
+          <dt>Verschmutzung laut deiner Angabe:</dt>
+          <dd>{{ verschmutzungLabel }}</dd>
+        </div>
+        <div class="rule-row">
+          <dt>→ Regel:</dt>
+          <dd>„{{ regeltext }}“ <span class="rule-source">(Quelle: {{ quelle }})</span></dd>
+        </div>
+        <div class="rule-row rule-row-final">
+          <dt>→ Empfehlung:</dt>
+          <dd><strong>{{ tonne }}</strong></dd>
+        </div>
+      </dl>
+
+      <div class="rule-disclaimer">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M8 4.5v4M8 11v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span>
+          <strong>Du hast das letzte Wort.</strong>
+          Im Zweifel beim
+          <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+          prüfen.
+        </span>
       </div>
     </div>
   </div>
@@ -64,7 +123,7 @@ const pct = computed(() => Math.round(props.result.confidence * 100))
 
 <style scoped>
 .result-card {
-  margin-top: 32px;
+  margin-top: 24px;
   border-radius: 20px;
   overflow: hidden;
   animation: slideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1);
@@ -128,6 +187,16 @@ const pct = computed(() => Math.round(props.result.confidence * 100))
   opacity: 0.65;
 }
 
+.result-manual-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .result-body {
   background: oklch(100% 0 0 / 0.45);
   padding: 24px 32px 28px;
@@ -163,6 +232,81 @@ const pct = computed(() => Math.round(props.result.confidence * 100))
   border-radius: 100px;
 }
 
+/* ── Stufe 3: Transparente Regel ──────────────────────────── */
+.rule-block {
+  background: oklch(100% 0 0 / 0.7);
+  border-top: 1px solid oklch(0% 0 0 / 0.06);
+  padding: 22px 32px 26px;
+}
+
+.rule-heading {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.rule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.rule-row {
+  display: grid;
+  grid-template-columns: minmax(180px, max-content) 1fr;
+  gap: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.rule-row dt {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.rule-row dd {
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.rule-source {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.rule-row-final {
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.rule-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--sage-light);
+  color: var(--forest);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.rule-disclaimer svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rule-disclaimer a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 @media (max-width: 680px) {
   .result-body {
     grid-template-columns: 1fr;
@@ -170,6 +314,16 @@ const pct = computed(() => Math.round(props.result.confidence * 100))
   .result-header {
     padding: 20px;
     flex-wrap: wrap;
+  }
+  .rule-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .rule-row dt {
+    font-size: 0.78rem;
+  }
+  .rule-block {
+    padding: 20px;
   }
 }
 </style>

@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+    <!--
+      Teachable Machine — client-side Bildklassifikation.
+      HCAI Prinzip 3 (Sicherheit): Modell läuft komplett im Browser,
+      keine Bilddaten verlassen das Gerät. Wird erst aktiv, sobald
+      TM_MODEL_URL in src/data/waste.js gesetzt ist.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
   </head>
   <body>
     <div id="app"></div>
