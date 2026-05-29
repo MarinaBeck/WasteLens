@@ -113,7 +113,7 @@ const zeigeVerschmutzung = computed(() => props.verschmutzung !== BESTAETIGT)
         <span>
           <strong>Du hast das letzte Wort.</strong>
           Im Zweifel beim
-          <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+          <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-ABC der OÖ Umweltprofis</a>
           prüfen.
         </span>
       </div>

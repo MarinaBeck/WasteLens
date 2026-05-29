@@ -213,9 +213,9 @@ export const CONFIDENCE_THRESHOLDS = {
 }
 
 // Quellen-Verweis für die transparente Regel-Anzeige (Stufe 3).
-// Lokales PDF (liegt unter src/public/abfall-trenn-abc.pdf) —
-// wird unabhängig von externer Verfügbarkeit ausgeliefert und
-// verlässt die App-Domain nicht.
-export const ABF_OOE_URL = '/abfall-trenn-abc.pdf'
-export const ABF_OOE_LABEL = 'Abfall-Trenn-ABC (PDF)'
+// Offizielle Trennhinweise des OÖ Landesabfallverbands (umweltprofis.at).
+// Bewusst als externer Link statt mitgeliefertem Fremd-PDF — der Aufruf
+// erfolgt nur, wenn der User aktiv darauf klickt (keine Auto-Einbindung).
+export const ABF_OOE_URL = 'https://www.umweltprofis.at/allgemein/wissenswertes/abfalltrennung.html'
+export const ABF_OOE_LABEL = 'Abfall-ABC der OÖ Umweltprofis'
 

@@ -215,7 +215,7 @@ function onSetContamination(value) {
             <strong>Wenn du dir unsicher bist</strong>, wie du den Artikel entsorgen sollst,
             frage die Mitarbeiter:innen in deinem nächsten Altstoffsammelzentrum (ASZ)
             oder schau im
-            <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+            <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-ABC der OÖ Umweltprofis</a>
             nach.
           </p>
         </div>

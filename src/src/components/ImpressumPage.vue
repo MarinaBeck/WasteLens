@@ -181,10 +181,9 @@
 
         <h2>Quelle der Entsorgungsregeln</h2>
         <p>
-          Die in WasteLense angezeigten Entsorgungsregeln basieren auf dem
-          <a href="/abfall-trenn-abc.pdf" target="_blank" rel="noopener">Abfall-Trenn-ABC (PDF)</a>
-          des oberösterreichischen Abfallwirtschaftsverbands. Das PDF wird zur Offline-
-          Verfügbarkeit lokal mit der Anwendung ausgeliefert.
+          Die in WasteLense angezeigten Entsorgungsregeln basieren auf den
+          Trennhinweisen des oberösterreichischen Landesabfallverbands
+          (<a href="https://www.umweltprofis.at/allgemein/wissenswertes/abfalltrennung.html" target="_blank" rel="noopener">umweltprofis.at</a>).
         </p>
       </section>
     </div>

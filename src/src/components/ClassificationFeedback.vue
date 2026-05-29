@@ -118,7 +118,7 @@ function bestaetigeKlasse() {
       </p>
       <p>
         Bitte prüfe den Artikel manuell beim
-        <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+        <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-ABC der OÖ Umweltprofis</a>
         oder nimm ein neues, deutlicheres Foto auf.
       </p>
     </div>
@@ -139,7 +139,7 @@ function bestaetigeKlasse() {
       <div class="banner-body">
         <strong>Unsichere Erkennung ({{ pctAktiv }} %).</strong>
         Empfehlung mit Vorbehalt — im Zweifel beim
-        <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+        <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-ABC der OÖ Umweltprofis</a>
         nachschlagen.
       </div>
     </div>
@@ -247,7 +247,7 @@ function bestaetigeKlasse() {
           <p>
             <strong>Keine davon passt?</strong>
             Schau im
-            <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-Trenn-ABC (PDF)</a>
+            <a :href="ABF_OOE_URL" target="_blank" rel="noopener noreferrer">Abfall-ABC der OÖ Umweltprofis</a>
             nach oder frag die Mitarbeiter:innen in deinem nächsten
             Altstoffsammelzentrum (ASZ).
           </p>

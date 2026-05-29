@@ -110,7 +110,7 @@ export const KLASSEN_KONFIG = [
 //   regeltext     ← vom Team final zu befüllen
 //   quelle        ← vom Team final zu befüllen / verifizieren
 // ─────────────────────────────────────────────────────────────
-const QUELLE_PLACEHOLDER = 'Abfall-Trenn-ABC (PDF), Stand 2025'
+const QUELLE_PLACEHOLDER = 'Abfall-ABC der OÖ Umweltprofis, Stand 2025'
 
 export const entsorgungsRegeln = [
   // ── Restmüll ─ ohne Verschmutzungs-Differenzierung ─────────
