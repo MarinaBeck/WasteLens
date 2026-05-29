@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { ABF_OOE_URL } from './data/waste.js'
 import { getRegel } from './data/disposalRules.js'
+import { pickRandomSticker } from './data/stickers.js'
 import {
   classify,
   evaluateConfidence,
@@ -18,6 +19,7 @@ import FAQSection from './components/FAQSection.vue'
 import TheFooter from './components/TheFooter.vue'
 import ImpressumPage from './components/ImpressumPage.vue'
 import VideoGuide from './components/VideoGuide.vue'
+import StickerReward from './components/StickerReward.vue'
 
 const showImpressum = ref(false)
 
@@ -44,6 +46,11 @@ const contamination = ref(null)     // 'sauber' | 'leicht' | 'stark'
 const modelError = ref(false)       // Modell konnte nicht geladen werden
 
 const resultEl = ref(null)
+
+// Belohnungs-Sticker: pro erfolgreichem Scan einmal gezogen und
+// stabil gehalten (ändert sich nicht, wenn der User danach Klasse
+// oder Verschmutzung anpasst — es bleibt derselbe Scan).
+const currentSticker = ref(null)
 
 // ─────────────────────────────────────────────────────────────
 // Computed: aktive Klasse (Top-1 ODER User-Auswahl)
@@ -104,6 +111,9 @@ async function analyse() {
       modelError.value = true
     } else {
       predictions.value = result
+      // Neuer Belohnungs-Sticker pro Scan; den zuletzt gezeigten
+      // ausschließen, damit nicht zweimal in Folge derselbe kommt.
+      currentSticker.value = pickRandomSticker(currentSticker.value?.id)
     }
   } catch (e) {
     console.error('Klassifikation fehlgeschlagen:', e)
@@ -233,6 +243,13 @@ function onSetContamination(value) {
           :regeltext="regel.regeltext"
           :quelle="regel.quelle"
           :tonne="regel.tonne"
+        />
+
+        <!-- Belohnung: zufälliger Sticker zum Teilen, sobald eine
+             Empfehlung steht (gleiche Bedingung wie die ResultCard). -->
+        <StickerReward
+          v-if="showStage3 && currentSticker"
+          :sticker="currentSticker"
         />
       </div>
     </section>

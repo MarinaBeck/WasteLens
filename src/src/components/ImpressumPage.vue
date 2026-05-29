@@ -22,10 +22,10 @@
 
         <h2>Projektmitglieder</h2>
         <ul>
-          <li>Vanessa Maurer — <a href="mailto:s2410892020fhooe.at">s2410892020@fhooe.at</a></li>
+          <li>Vanessa Maurer — <a href="mailto:s2410892020@fhooe.at">s2410892020@fhooe.at</a></li>
           <li>Marina Beck — <a href="mailto:s2410892007@fhooe.at">s2410892007@fhooe.at</a></li>
-          <li>Desiree Aichstill — <a href="mailto:s2410892003@fhooe.at">s2401892003@fhooe.at</a></li>
-          <li>Nathalie Döberl — <a href="mailto:s2410892010@fhooe.at">s2401892010@fhooe.at</a></li>
+          <li>Desiree Aichstill — <a href="mailto:s2410892003@fhooe.at">s2410892003@fhooe.at</a></li>
+          <li>Nathalie Döberl — <a href="mailto:s2410892010@fhooe.at">s2410892010@fhooe.at</a></li>
         </ul>
 
         <p class="contact-note">
@@ -93,16 +93,13 @@
         </p>
 
         <h2>Eingebundene Dienste Dritter</h2>
-
-        <h3>Google Fonts</h3>
         <p>
-          Diese Website lädt Schriftarten über Google Fonts (Google LLC, 1600 Amphitheatre
-          Parkway, Mountain View, CA 94043, USA). Beim Laden der Schriftarten wird deine
-          IP-Adresse an Google-Server übertragen, die sich unter Umständen außerhalb der EU
-          bzw. des EWR befinden. Google LLC ist unter dem EU-US Data Privacy Framework
-          zertifiziert, das auf Grundlage eines Angemessenheitsbeschlusses der Europäischen
-          Kommission nach Art. 45 DSGVO ein angemessenes Datenschutzniveau gewährleistet.
-          Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
+          Diese Website bindet keine Dienste Dritter ein. Alle Ressourcen — Schriftarten
+          (Lora, DM Sans), das KI-Modell sowie die Programmbibliotheken für die
+          Bildklassifizierung (TensorFlow.js, Teachable Machine) — werden direkt vom
+          Hosting-Server dieser Website ausgeliefert. Es werden keine Inhalte von externen
+          Servern (etwa Google Fonts oder Content-Delivery-Netzwerke) nachgeladen. Dadurch
+          wird beim Aufruf der Website keine IP-Adresse an Dritte übertragen.
         </p>
 
         <h2>Speicherdauer</h2>
@@ -114,10 +111,8 @@
 
         <h2>Weitergabe von Daten</h2>
         <p>
-          Eine Weitergabe personenbezogener Daten an Dritte erfolgt nicht, mit Ausnahme
-          der technisch bedingten Übertragung der IP-Adresse beim Laden von Google Fonts
-          (siehe oben). Eine Nutzung zu Werbezwecken oder ein Verkauf von Daten findet
-          nicht statt.
+          Eine Weitergabe personenbezogener Daten an Dritte erfolgt nicht. Eine Nutzung
+          zu Werbezwecken oder ein Verkauf von Daten findet nicht statt.
         </p>
 
         <h2>Keine automatisierte Entscheidungsfindung</h2>

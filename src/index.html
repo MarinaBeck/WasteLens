@@ -5,18 +5,31 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WasteLense — Abfall richtig sortieren</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <meta name="description" content="WasteLense erkennt Haushaltsabfall per Foto und zeigt die richtige Tonne. Die Bildanalyse läuft vollständig lokal im Browser — keine Daten verlassen dein Gerät." />
+    <meta name="theme-color" content="#003c10" />
+
+    <!-- Open Graph — Vorschau beim Teilen des Links -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_AT" />
+    <meta property="og:title" content="WasteLense — Abfall richtig sortieren" />
+    <meta property="og:description" content="Foto aufnehmen, richtige Tonne erfahren. Lokale KI-Klassifikation, keine Datenübertragung." />
+
+    <!--
+      Schriften (Lora, DM Sans) lokal gehostet statt über Google Fonts.
+      DSGVO: Beim Seitenaufruf entsteht keine Verbindung zu Google-Servern,
+      es wird keine IP-Adresse an Dritte übertragen.
+    -->
+    <link rel="stylesheet" href="/fonts/fonts.css" />
 
     <!--
       Teachable Machine — client-side Bildklassifikation.
       HCAI Prinzip 3 (Sicherheit): Modell läuft komplett im Browser,
-      keine Bilddaten verlassen das Gerät. Wird erst aktiv, sobald
-      TM_MODEL_URL in src/data/waste.js gesetzt ist.
+      keine Bilddaten verlassen das Gerät.
+      Die Libraries (TensorFlow.js + Teachable Machine) werden lokal
+      ausgeliefert — kein CDN, keine Verbindung zu Drittservern.
     -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
+    <script src="/vendor/tf.min.js"></script>
+    <script src="/vendor/teachablemachine-image.min.js"></script>
   </head>
   <body>
     <div id="app"></div>
