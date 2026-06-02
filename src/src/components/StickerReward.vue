@@ -1,4 +1,4 @@
-<script setup>
+npm install<script setup>
 // ─────────────────────────────────────────────────────────────
 // StickerReward — verspielte Belohnung nach erfolgreichem Scan
 // ─────────────────────────────────────────────────────────────

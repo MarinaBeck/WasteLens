@@ -22,10 +22,10 @@
 
         <h2>Projektmitglieder</h2>
         <ul>
-          <li>Vanessa Maurer — <a href="mailto:s2410892020@fhooe.at">s2410892020@fhooe.at</a></li>
-          <li>Marina Beck — <a href="mailto:s2410892007@fhooe.at">s2410892007@fhooe.at</a></li>
-          <li>Desiree Aichstill — <a href="mailto:s2410892003@fhooe.at">s2410892003@fhooe.at</a></li>
-          <li>Nathalie Döberl — <a href="mailto:s2410892010@fhooe.at">s2410892010@fhooe.at</a></li>
+          <li>Vanessa Maurer</li>
+          <li>Marina Beck</li>
+          <li>Desiree Aichstill</li>
+          <li>Nathalie Döberl</li>
         </ul>
 
         <p class="contact-note">
@@ -49,7 +49,7 @@
         <h2>Verantwortliche</h2>
         <p>
           Verantwortlich für die Datenverarbeitung im Sinne der DSGVO sind die oben genannten
-          Projektmitglieder (Vanessa Maurer, Marina Beck, Desiree Aichstill) als gemeinsam
+          Projektmitglieder (Vanessa Maurer, Marina Beck, Desiree Aichstill, Nathalie Döberl) als gemeinsam
           Verantwortliche gemäß Art. 26 DSGVO. Für Datenschutzanfragen wende dich per E-Mail
           an eine der oben angeführten Adressen.
         </p>
