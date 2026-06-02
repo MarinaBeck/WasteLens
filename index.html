@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/WasteLens/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WasteLense — Abfall richtig sortieren</title>
+    <meta name="description" content="WasteLense erkennt Haushaltsabfall per Foto und zeigt die richtige Tonne. Die Bildanalyse läuft vollständig lokal im Browser — keine Daten verlassen dein Gerät." />
+    <meta name="theme-color" content="#003c10" />
+
+    <!-- Open Graph — Vorschau beim Teilen des Links -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_AT" />
+    <meta property="og:title" content="WasteLense — Abfall richtig sortieren" />
+    <meta property="og:description" content="Foto aufnehmen, richtige Tonne erfahren. Lokale KI-Klassifikation, keine Datenübertragung." />
+
+    <!--
+      Schriften (Lora, DM Sans) lokal gehostet statt über Google Fonts.
+      DSGVO: Beim Seitenaufruf entsteht keine Verbindung zu Google-Servern,
+      es wird keine IP-Adresse an Dritte übertragen.
+    -->
+    <link rel="stylesheet" href="/WasteLens/fonts/fonts.css" />
+
+    <!--
+      Teachable Machine — client-side Bildklassifikation.
+      HCAI Prinzip 3 (Sicherheit): Modell läuft komplett im Browser,
+      keine Bilddaten verlassen das Gerät.
+      Die Libraries (TensorFlow.js + Teachable Machine) werden lokal
+      ausgeliefert — kein CDN, keine Verbindung zu Drittservern.
+    -->
+    <script src="/WasteLens/vendor/tf.min.js"></script>
+    <script src="/WasteLens/vendor/teachablemachine-image.min.js"></script>
+    <script type="module" crossorigin src="/WasteLens/assets/index-DaO5vprB.js"></script>
+    <link rel="stylesheet" crossorigin href="/WasteLens/assets/index-wKhhRAgO.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
